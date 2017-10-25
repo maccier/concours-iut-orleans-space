@@ -46,8 +46,10 @@ def play(game): # codé l'ia dans cette fonction
     global t, em
     if em > 0:
         addEnergyEngine(1)
+        addEnergyShootSpeed(1)
+        addEnergyShootSpeed(1)
         em -=1
-
+        return
     else:
         if t <= 0:
             turn(5)
@@ -91,7 +93,6 @@ def read(msg):
         game = [players,missiles]
         play(game)
 
-
 class reader(Thread):
 
 
@@ -102,14 +103,19 @@ class reader(Thread):
         Thread.__init__(self)
         self.s = s
         self.stop = False
+        self.msg = ""
 
     def run(self):
 
         while not self.stop:
             data = self.s.recv(BUFFER_SIZE)
             data = data.decode()
-            data = data.replace("\n","")
-            read(data)
+            self.msg += data
+            if "\n" in self.msg:
+                self.msg = self.msg.replace("\n","")
+                read(self.msg)
+                self.msg = "";
+
 
 class writer(Thread):
 
@@ -131,7 +137,6 @@ class writer(Thread):
                 self.msg = self.msg[1:]
                 data += "\n"
                 s.send(data.encode())
-                print("send",data)
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
